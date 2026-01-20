@@ -2,7 +2,6 @@
 
 export async function getCountryNews() {
   try {
-    console.log("Fetching country news...");
     const result = await fetch(
       `https://newsapi.org/v2/everything?q=country&apiKey=${process.env.NEWS_API_KEY}`,
     );
@@ -16,7 +15,6 @@ export async function getCountryNews() {
 
 export async function getTopHeadlines(country: string) {
   try {
-    console.log("Fetching top headlines...");
     const result = await fetch(
       `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${process.env.NEWS_API_KEY}`,
     );
