@@ -9,9 +9,12 @@ export default function FilterTab() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  const handleFilterChange = () => {
-    // Call backend API with selected filters
-    console.log({ category, language, source, dateFrom, dateTo });
+  const handleFilterChange = async () => {
+    const filtered = await fetch(`https://newsapi.org/v2/top-headlines/sources?&apiKey=${process.env.NEWS_API_KEY}`, {
+      method: "GET",
+    });
+    const data = await filtered.json();
+    console.log(data);
   };
 
   return (
@@ -40,19 +43,7 @@ export default function FilterTab() {
         <option value="fr">French</option>
         <option value="de">German</option>
       </select>
-
-      {/* Source Filter */}
-      <select
-        value={source}
-        onChange={(e) => setSource(e.target.value)}
-        className="px-3 text-orange-500 py-2 border rounded-md"
-      >
-        <option value="">All Sources</option>
-        <option value="bbc">BBC</option>
-        <option value="cnn">CNN</option>
-        <option value="reuters">Reuters</option>
-      </select>
-
+      
       {/* Date Range Filter */}
       <input
         type="date"

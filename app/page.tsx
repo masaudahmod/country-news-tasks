@@ -1,20 +1,31 @@
 import NewsCard from "@/components/NewsCard";
-import { getCountryNews, getTopHeadlines } from "../lib/actions";
+import {
+  getCountryNews,
+  getFilteredNews,
+  getTopHeadlines,
+} from "../lib/actions";
 import { NewsType } from "./types";
 import SelectCountry from "@/components/SelectCountry";
 import FilterTab from "@/components/FilterTab";
 import Link from "next/link";
 
 export default async function Home(searchParams: {
-  searchParams: { country?: string }; // Optional because user may not pass it
+  searchParams: { country?: string };
 }) {
   const country = searchParams.searchParams.country as string;
   console.log("country", country);
   const response = await getCountryNews();
   const articles = response?.articles;
   const headLines = await getTopHeadlines(country || "us");
-  const res = await fetch("http://localhost:3000/api/fetch-new", { method: "POST" });
-  console.log("res from fetch-new", res);
+  const getFilteredNewss = await getFilteredNews();
+  const filteredNews = getFilteredNewss?.sources.filter((news: any) =>
+    country ? news.country === country : news.country === "us",
+  );
+  console.log(
+    "filtered news",
+    filteredNews.filter((news: any) => news.language === "en"),
+  );
+
   return (
     <>
       <div className="container mx-auto">
@@ -70,6 +81,30 @@ export default async function Home(searchParams: {
           <FilterTab />
         </div>
 
+        {filteredNews.length > 0 ? (
+          <>
+            <h2 className="text-xl text-center font-semibold py-2 px-5">
+              Filtered News
+            </h2>
+            <div className="columns-1 md:columns-2 lg:columns-3 gap-3 mb-3">
+              {filteredNews.map((article: NewsType, index: number) => (
+                <div key={index} className="break-inside-avoid mb-3">
+                  <NewsCard key={index} {...article} />
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-3 mb-3">
+            {articles &&
+              articles?.map((article: NewsType, index: number) => (
+                <div key={index} className="break-inside-avoid mb-3">
+                  <NewsCard key={index} {...article} />
+                </div>
+              ))}
+          </div>
+        )}
+
         {country ? (
           <h2 className="text-xl text-center font-semibold py-2 px-5">
             Top Headlines - {country.toUpperCase()}
@@ -79,13 +114,6 @@ export default async function Home(searchParams: {
             Top Headlines - US
           </h2>
         )}
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-3 mb-3">
-          {articles?.map((article: NewsType, index: number) => (
-            <div key={index} className="break-inside-avoid mb-3">
-              <NewsCard key={index} {...article} />
-            </div>
-          ))}
-        </div>
       </div>{" "}
     </>
   );

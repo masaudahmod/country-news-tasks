@@ -25,3 +25,25 @@ export async function getTopHeadlines(country: string) {
     throw error;
   }
 }
+
+export async function getFilteredNews(
+  category: string,
+  language: string,
+  source: string,
+  dateFrom: string,
+  dateTo: string,
+) {
+  try {
+    const filtered = await fetch(
+      `https://newsapi.org/v2/top-headlines/sources?&apiKey=${process.env.NEWS_API_KEY}`,
+      {
+        method: "GET",
+      },
+    );
+    const data = await filtered.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching filtered news:", error);
+    throw error;
+  }
+}
