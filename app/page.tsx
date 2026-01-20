@@ -2,14 +2,17 @@ import NewsCard from "@/components/NewsCard";
 import { getCountryNews, getTopHeadlines } from "./lib/actions";
 import { NewsType } from "./types";
 import SelectCountry from "@/components/SelectCountry";
+import FilterTab from "@/components/FilterTab";
 
-export default async function Home(searchParams: { country: string }) {
-  const country = searchParams?.country as string || "us"
-  console.log("country in page.tsx:", country);
+export default async function Home(searchParams: {
+  searchParams: { country?: string }; // Optional because user may not pass it
+}) {
+  const country = searchParams.searchParams.country as string;
+  console.log("country", country);
   const response = await getCountryNews();
   const articles = response?.articles;
-  const headLines = await getTopHeadlines("de");
-  console.log("headLines:", headLines);
+  const headLines = await getTopHeadlines(country || "us");
+  console.log("headLines", headLines);
   return (
     <>
       <div className="container mx-auto">
@@ -58,6 +61,20 @@ export default async function Home(searchParams: { country: string }) {
           </div> */}
           <SelectCountry country={country} />
         </div>
+
+        <div>
+          <FilterTab />
+        </div>
+
+        {country ? (
+          <h2 className="text-xl text-center font-semibold py-2 px-5">
+            Top Headlines - {country.toUpperCase()}
+          </h2>
+        ) : (
+          <h2 className="text-xl text-center font-semibold py-2 px-5">
+            Top Headlines - US
+          </h2>
+        )}
         <div className="columns-1 md:columns-2 lg:columns-3 gap-3 mb-3">
           {articles?.map((article: NewsType, index: number) => (
             <div key={index} className="break-inside-avoid mb-3">
