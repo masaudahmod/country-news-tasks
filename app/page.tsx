@@ -1,8 +1,9 @@
 import NewsCard from "@/components/NewsCard";
-import { getCountryNews, getTopHeadlines } from "./lib/actions";
+import { getCountryNews, getTopHeadlines } from "../lib/actions";
 import { NewsType } from "./types";
 import SelectCountry from "@/components/SelectCountry";
 import FilterTab from "@/components/FilterTab";
+import Link from "next/link";
 
 export default async function Home(searchParams: {
   searchParams: { country?: string }; // Optional because user may not pass it
@@ -12,7 +13,8 @@ export default async function Home(searchParams: {
   const response = await getCountryNews();
   const articles = response?.articles;
   const headLines = await getTopHeadlines(country || "us");
-  console.log("headLines", headLines);
+  const res = await fetch("http://localhost:3000/api/fetch-new", { method: "POST" });
+  console.log("res from fetch-new", res);
   return (
     <>
       <div className="container mx-auto">
@@ -20,7 +22,9 @@ export default async function Home(searchParams: {
           <h1 className="text-3xl py-5 font-bold">Country - News</h1>{" "}
         </div>
         <div className="px-5 py-5 flex flex-col md:flex-row items-center justify-between">
-          <h2 className="text-xl py-2">All News </h2>
+          <Link href="/news" className="text-xl py-2">
+            All News{" "}
+          </Link>
           {/* <div className="flex items-center gap-5 capitalize">
             <p>search by country:</p>
             <select className="px-5 w-44 py-2 border rounded-md text-gray-300 focus:outline-none">
