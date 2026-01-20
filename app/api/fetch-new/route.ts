@@ -1,54 +1,34 @@
-import { dbConnect } from "@/lib/db";
-import { News } from "@/lib/model";
+import { fetchAndStoreNews } from "@/lib/news";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    await dbConnect();
+    const { searchParams } = new URL(request.url);
+    const country = searchParams.get("country") || "us";
+    const category = searchParams.get("category") || undefined;
+    const language = searchParams.get("language") || undefined;
 
-    if (!process.env.NEWS_API_KEY) {
-      throw new Error("NEWS_API_KEY is missing");
-    }
+    const count = await fetchAndStoreNews({ country, category, language });
 
-    const res = await fetch(
-      `https://newsapi.org/v2/top-headlines?country=us&apiKey=${process.env.NEWS_API_KEY}`
-    );
-    const data = await res.json();
-
-    if (!data.articles) {
-      return NextResponse.json({ success: false, message: "No articles found" }, { status: 404 });
-    }
-
-    for (const article of data.articles) {
-      // Upsert to prevent duplicates
-      await News.updateOne(
-        { url: article.url },
-        {
-          $set: {
-            title: article.title,
-            description: article.description,
-            urlToImage: article.urlToImage,
-            url: article.url,
-            publishedAt: article.publishedAt,
-            content: article.content,
-            source: { id: article.source.id, name: article.source.name },
-            
-          },
-        },
-        { upsert: true }
+    if (!count) {
+      return NextResponse.json(
+        { success: false, message: "No articles found" },
+        { status: 404 },
       );
     }
 
     return NextResponse.json({
       success: true,
       message: "News fetched and stored successfully",
-      count: data.articles.length,
+      count,
     });
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Error fetching news";
     console.error("Error fetching and storing news:", error);
     return NextResponse.json(
-      { success: false, message: error.message || "Error fetching news" },
-      { status: 500 }
+      { success: false, message },
+      { status: 500 },
     );
   }
 }

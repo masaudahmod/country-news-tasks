@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { type Mongoose } from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -6,9 +6,22 @@ if (!MONGODB_URI) {
   throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
 }
 
-let cached = global.mongoose
+type MongooseCache = {
+  conn: Mongoose | null;
+  promise: Promise<Mongoose> | null;
+};
 
-if (!cached) cached = global.mongoose = { conn: null, promise: null };
+declare global {
+  // eslint-disable-next-line no-var
+  var mongoose: MongooseCache | undefined;
+}
+
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = { conn: null, promise: null };
+  global.mongoose = cached;
+}
 
 export const dbConnect = async () => {
   if (cached.conn) {

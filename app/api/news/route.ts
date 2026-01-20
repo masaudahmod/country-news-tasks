@@ -1,21 +1,24 @@
-import { dbConnect } from "@/lib/db";
-import { News } from "@/lib/model";
+import { getNewsFromDb } from "@/lib/news";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-    await dbConnect();
-    const searchParams = new URL(request.url).searchParams;
-    const country = searchParams.get("country") || "us";
-    const category = searchParams.get("category") || "general";
+  const searchParams = new URL(request.url).searchParams;
+  const country = searchParams.get("country") || "us";
+  const category = searchParams.get("category") || undefined;
+  const language = searchParams.get("language") || undefined;
+  const dateFrom = searchParams.get("dateFrom") || undefined;
+  const dateTo = searchParams.get("dateTo") || undefined;
 
-    const filter: any = {};
-    if (country) filter.country = country;
-    if (category) filter.category = category;
+  const news = await getNewsFromDb({
+    country,
+    category,
+    language,
+    dateFrom,
+    dateTo,
+  });
 
-    const news = await News.find(filter).sort({ publishedAt: -1 }).limit(50);
-
-    return NextResponse.json({
-        success: true,
-        data: news,
-    });
+  return NextResponse.json({
+    success: true,
+    data: news,
+  });
 }

@@ -2,6 +2,7 @@ import mongoose, { model, models } from "mongoose";
 
 const newsSchema = new mongoose.Schema(
   {
+    author: { type: String },
     title: { type: String },
     description: { type: String },
     url: { type: String },

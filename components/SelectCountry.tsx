@@ -1,18 +1,26 @@
 "use client";
 
-import { useRouter } from "next/dist/client/components/navigation";
+import { useRouter } from "next/navigation";
 
-export default function SelectCountry(country : { country: string }) {
-    const router = useRouter();
-    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedCountry = e.target.value;
-        router.push(`/?country=${selectedCountry}`);
-    }
+type SelectCountryProps = {
+  country: string;
+};
+
+export default function SelectCountry({ country }: SelectCountryProps) {
+  const router = useRouter();
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedCountry = e.target.value;
+    router.push(`/?country=${selectedCountry}`);
+  };
   return (
     <>
       <div className="flex items-center gap-5 capitalize">
         <p>search by country:</p>
-        <select value={country.country} onChange={handleSelectChange} className="px-5 w-44 py-2 border rounded-md text-gray-300 focus:outline-none">
+        <select
+          value={country}
+          onChange={handleSelectChange}
+          className="px-5 w-44 py-2 border rounded-md text-gray-300 focus:outline-none"
+        >
           <option className="text-red-600 capitalize" value="us">
             USA
           </option>

@@ -1,25 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function FilterTab() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [category, setCategory] = useState("");
   const [language, setLanguage] = useState("");
-  const [source, setSource] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  const handleFilterChange = async () => {
-    const filtered = await fetch(`https://newsapi.org/v2/top-headlines/sources?&apiKey=${process.env.NEWS_API_KEY}`, {
-      method: "GET",
-    });
-    const data = await filtered.json();
-    console.log(data);
+  useEffect(() => {
+    setCategory(searchParams.get("category") || "");
+    setLanguage(searchParams.get("language") || "");
+    setDateFrom(searchParams.get("dateFrom") || "");
+    setDateTo(searchParams.get("dateTo") || "");
+  }, [searchParams]);
+
+  const handleFilterChange = () => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (category) {
+      params.set("category", category);
+    } else {
+      params.delete("category");
+    }
+
+    if (language) {
+      params.set("language", language);
+    } else {
+      params.delete("language");
+    }
+
+    if (dateFrom) {
+      params.set("dateFrom", dateFrom);
+    } else {
+      params.delete("dateFrom");
+    }
+
+    if (dateTo) {
+      params.set("dateTo", dateTo);
+    } else {
+      params.delete("dateTo");
+    }
+
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
   };
 
   return (
     <div className="flex flex-col md:flex-row items-center justify-evenly gap-4 p-4 rounded-md mb-6">
-        <h3 className="text-lg font-bold">Filter Your News:</h3>
+      <h3 className="text-lg font-bold">Filter Your News:</h3>
       {/* Category Filter */}
       <select
         value={category}
@@ -43,7 +76,7 @@ export default function FilterTab() {
         <option value="fr">French</option>
         <option value="de">German</option>
       </select>
-      
+
       {/* Date Range Filter */}
       <input
         type="date"

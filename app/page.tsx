@@ -1,30 +1,38 @@
 import NewsCard from "@/components/NewsCard";
-import {
-  getCountryNews,
-  getFilteredNews,
-  getTopHeadlines,
-} from "../lib/actions";
+import { getCountryNews, getFilteredNews } from "../lib/actions";
 import { NewsType } from "./types";
 import SelectCountry from "@/components/SelectCountry";
 import FilterTab from "@/components/FilterTab";
 import Link from "next/link";
 
-export default async function Home(searchParams: {
-  searchParams: { country?: string };
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: {
+    country?: string;
+    category?: string;
+    language?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  };
 }) {
-  const country = searchParams.searchParams.country as string;
-  console.log("country", country);
-  const response = await getCountryNews();
-  const articles = response?.articles;
-  const headLines = await getTopHeadlines(country || "us");
-  const getFilteredNewss = await getFilteredNews();
-  const filteredNews = getFilteredNewss?.sources.filter((news: any) =>
-    country ? news.country === country : news.country === "us",
-  );
-  console.log(
-    "filtered news",
-    filteredNews.filter((news: any) => news.language === "en"),
-  );
+  const country = searchParams.country || "us";
+  const category = searchParams.category || "";
+  const language = searchParams.language || "";
+  const dateFrom = searchParams.dateFrom || "";
+  const dateTo = searchParams.dateTo || "";
+
+  const articles = await getCountryNews({ country });
+  const hasFilters = Boolean(category || language || dateFrom || dateTo);
+  const filteredNews = hasFilters
+    ? await getFilteredNews({
+        country,
+        category: category || undefined,
+        language: language || undefined,
+        dateFrom: dateFrom || undefined,
+        dateTo: dateTo || undefined,
+      })
+    : [];
 
   return (
     <>
